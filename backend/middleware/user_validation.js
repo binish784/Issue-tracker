@@ -1,5 +1,8 @@
 const User=require("../models/user");
 
+// validate user is registered or not
+// requires user_email in json body
+
 const user_validation= async function(req,res,next){
     
     try{

@@ -11,6 +11,7 @@ const workspace_validation=require("../middleware/workspace_validation");
 const user_validation=require("../middleware/user_validation");
 const member_validation=require("../middleware/member_validation");
 
+
 const WorkSpaceSchema=Joi.object({
     name:Joi.string().required(),
 })
@@ -56,12 +57,14 @@ router.post("/",auth,async function(req,res){
             creator:user
         });
 
+        new_workspace.members.push(user);
+
         await new_workspace.save();
 
         // push workspace to user / save user
         await user.workspaces.push(new_workspace);
         user.save();
-        res.send({mgs:"New Workspace Added"})
+        res.send({msg:"New Workspace Added"})
 
     }catch(err){
         console.log(err);
@@ -95,7 +98,7 @@ router.post("/:id/user",
     
 })
 
-//remove user from workspace
+//remove member from workspace
 router.delete("/:id/user",
     auth,
     user_validation,
@@ -111,9 +114,9 @@ router.delete("/:id/user",
 
         //issues (Check if user is an member of workspace or not); 
         //11/8
+        //done 
 
         try{
-
 
             target_workspace.members.pull(target_user._id);
             target_user.workspaces.pull(target_workspace._id);
@@ -126,32 +129,5 @@ router.delete("/:id/user",
         }
     }
 )
-
-// add issues to workspace
-
-router.post(":id/issues",
-    auth,
-    user_validation,
-    workspace_validation,
-    member_validation,
-    async function(req,res){
-    const target_user=request.user;
-    const target_workspace=request.workspace;
-    
-    try{
-
-        //push user to workspace / save
-        target_user.issues.push(target_workspace);
-        target_workspace.members.push(target_user);
-        await target_workspace.save();
-        await target_user.save();
-        return res.send({msg:"User added to workspace"});
-
-    }catch(err){
-        console.log(err);
-        return res.send("SERVER ERROR");
-    }
-    
-})
 
 module.exports=router;
